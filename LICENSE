@@ -1,101 +1,70 @@
-Sovereign Forge — Dual License
+Business Source License 1.1
 
-================================================================================
-SOVEREIGN SOURCE LICENSE
-================================================================================
+License text copyright (c) 2020, Elastic or its affiliates (https://www.elastic.co).
+Licensed to the public under the Commons Clause License, version 1.0 or later.
 
-Copyright (c) 2026 SnapKitty Collective LLC. All rights reserved.
+Terms
 
-These engines are provided under a Sovereign Source license for commercial use.
+The Licensor hereby grants you the right to copy, modify, create derivative works,
+redistribute, and make non-production use of the Licensed Work. The Licensor may
+make an Additional Use Grant, above, permitting limited production use.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to:
+Effective on the Change Date, or the fourth anniversary of the first publicly
+available distribution of a specific version of the Licensed Work under this
+License, whichever comes first.
 
-1. Use the Software for any commercial purpose
-2. Modify the Software for internal use
-3. Deploy the Software in production environments
+If the Licensor has not made an Additional Use Grant, then it becomes
+unavailable as of the Change Date.
 
-Subject to the following conditions:
+Change Date: December 31, 2027
 
-1. The above copyright notice and this permission notice shall be included in
-   all copies or substantial portions of the Software.
-2. Commercial redistribution requires explicit written permission from the
-   copyright holder.
-3. These engines are for commercial licensees only. Academic and open-source
-   projects must use the Business Source License (see below).
+Change License: GNU Affero General Public License v3.0 or later
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+Notice
 
-================================================================================
-BUSINESS SOURCE LICENSE 1.1 (Change Date: December 31, 2027)
-================================================================================
+Business Source License Version 1.1
 
-Terms of the Business Source License 1.1
+This code is available under the Business Source License 1.1. For commercial use,
+see the Commercial License or contact licensing@snapkittywest.dev.
 
-Licensor: SnapKitty Collective LLC
-Licensed Work: Sovereign Forge
+Notice of Change: This Software will become available under AGPL-3.0-only
+as of December 31, 2027.
 
-The Licensed Work is © 2026 SnapKitty Collective LLC.
+Additional Use Grant: Evaluation licenses and internal business use permitted.
+For production use, see Commercial License Terms.
 
-1. Grant of Rights
-   Subject to the terms and conditions of this License, Licensor hereby grants
-   to each recipient of the Licensed Work a non-exclusive, worldwide,
-   royalty-free, fully-paid-up, non-transferable license to do the following:
+Restrictions
 
-   a) Run the Licensed Work;
-   b) Modify the Licensed Work and perform services relating to the Licensed
-      Work;
-   c) Display the Licensed Work;
-   d) Benchmark or perform testing of the Licensed Work for non-competitive
-      purposes.
+You may not offer the Licensed Work to third parties as a SaaS, hosted, or
+managed service, where the operation of the Licensed Work is under the control
+or oversight of a third party and Your users are not directly managing the
+Licensed Work.
 
-   You may not sublicense or transfer the Licensed Work under these terms.
-   You may not use the Licensed Work for competitive purposes.
+You may not move, change, disable, or circumvent any license key functionality
+in the Licensed Work.
 
-2. Effective Date
-   The license grants in Section 1 become effective on January 1, 2028
-   (the "Change Date").
+Disclaimer of Warranties
 
-   For any Licensed Work, after the Change Date, Licensor will make the
-   Licensed Work available under an open-source license.
+THE LICENSED WORK IS PROVIDED ON AN "AS-IS" BASIS. LICENSOR HEREBY DISCLAIMS
+ALL WARRANTIES AND CONDITIONS, EXPRESS, IMPLIED, STATUTORY, OR OTHERWISE,
+INCLUDING WITHOUT LIMITATION ANY WARRANTIES OF TITLE, FITNESS FOR A PARTICULAR
+PURPOSE, NON-INFRINGEMENT, OR ERROR-FREE OPERATION.
 
-3. Additional Terms
-   a) The Licensed Work shall not be used, in whole or in part, by any
-      entity to provide a competing product or service.
-   b) Any modifications you make must retain all copyright, patent, and
-      trademark notices.
-   c) You may not circumvent technical protection measures in the
-      Licensed Work.
+Limitation of Liability
 
-4. Grant of Patent License
-   Licensor grants a license to any patents that Licensor has the right to
-   license which are necessarily infringed by your exercise of any rights
-   under this License. However, you may not practice any patent not
-   necessarily infringed by the Licensed Work.
+IN NO EVENT AND UNDER NO LEGAL THEORY, WHETHER IN TORT (INCLUDING NEGLIGENCE),
+CONTRACT OR OTHERWISE, UNLESS REQUIRED BY APPLICABLE LAW (SUCH AS DELIBERATE
+AND GROSSLY NEGLIGENT ACTS), SHALL EITHER LICENSOR BE LIABLE TO YOU FOR DAMAGES,
+INCLUDING ANY DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+OF ANY CHARACTER ARISING AS A RESULT OF THIS LICENSE OR OUT OF THE USE OR
+INABILITY TO USE THE LICENSED WORK.
 
-5. Disclaimer
-   THE LICENSED WORK IS PROVIDED ON AN "AS-IS" BASIS. LICENSOR HEREBY
-   DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS, IMPLIED, STATUTORY,
-   OR OTHERWISE, AND SPECIFICALLY DISCLAIMS ANY WARRANTY OF
-   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
-   NON-INFRINGEMENT.
+Termination
 
-6. Limitation of Liability
-   IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY SPECIAL, INDIRECT,
-   INCIDENTAL, CONSEQUENTIAL, PUNITIVE, OR EXEMPLARY DAMAGES, WHETHER
-   ARISING OUT OF THIS LICENSE OR OTHERWISE, EVEN IF LICENSOR HAS BEEN
-   ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+If you violate any provision of this License, the rights granted to you terminate
+automatically.
 
-================================================================================
-LICENSE SUMMARY
-================================================================================
+Commercial License
 
-For commercial use:    Sovereign Source License
-For academic/OSS:      Business Source License (free after Dec 31, 2027)
-For competitive use:   Explicit written permission required
-
-Contact: licensing@snapkittywest.dev
-
-================================================================================
+For production use, SaaS hosting, or other commercial purposes, a separate
+Commercial License is required. Contact: licensing@snapkittywest.dev
