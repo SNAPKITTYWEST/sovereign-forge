@@ -1,0 +1,279 @@
+// sov_stack_ams.vams — Sovereign Stack Machine AMS Bridge
+// Verilog-AMS module mapping digital verified kernel to analog plant
+// Integrates: sovereign_stack_kernel (digital RTL) + Sensor/Actuator/Power
+// Simulates with: Xyce, Spectre, ngspice
+
+`include "disciplines.vams"
+
+module sov_stack_ams #(
+    parameter integer MAX_DEPTH = 16,         // Max stack height (from ValidStack proof)
+    parameter integer WIDTH = 64,              // Datapath width (int64_t)
+    parameter real SAMPLE_PERIOD = 1e-6,      // 1 MHz sampling (adjustable)
+    parameter real ADC_LSB = 1e-3,            // ADC least significant bit (1 mV)
+    parameter real DAC_SLEW = 100e-9          // DAC slew rate (100 ns)
+) (
+    // Digital Control Interface
+    input  logic                   clk,        // System clock
+    input  logic                   rst_n,      // Active-low reset
+    input  logic                   start,      // Program execution trigger
+    input  logic [1:0]             opcode,     // Instruction: 0=PUSH, 1=DUP, 2=SWAP, 3=ADD
+    input  logic signed [WIDTH-1:0] imm_val,   // Immediate operand (for PUSH)
+    output logic                   done,       // Execution complete flag
+    output logic signed [WIDTH-1:0] tos,       // Top-of-stack output (digital)
+
+    // Analog Sensor/Actuator Interface (3-terminal: inout)
+    inout electrical               v_sensor,   // Analog sensor input voltage
+    inout electrical               v_actuate,  // Analog actuator output voltage
+    inout electrical               gnd         // Ground reference
+);
+
+    // ═══ 1. DIGITAL CORE (Register File + ALU) ═══
+
+    // Verified Register File: Stack memory (DEPTH-entry register file)
+    logic signed [WIDTH-1:0] rf [0:MAX_DEPTH-1];
+    logic [$clog2(MAX_DEPTH):0] sp;           // Stack pointer (= current height)
+
+    // ALU Functions (Pure, Combinational)
+    function automatic logic signed [WIDTH-1:0] f_push(input logic signed [WIDTH-1:0] x);
+        return x;
+    endfunction
+
+    function automatic logic signed [WIDTH-1:0] f_dup(input logic signed [WIDTH-1:0] top);
+        return top;
+    endfunction
+
+    function automatic logic signed [WIDTH-1:0] f_add(
+        input logic signed [WIDTH-1:0] a,
+        input logic signed [WIDTH-1:0] b
+    );
+        return a + b;
+    endfunction
+
+    // ═══ 2. ANALOG SAMPLING (ADC Model) ═══
+
+    // Sensed voltage (real-valued continuous from Xyce/Spectre)
+    real v_sensor_real;
+
+    // Quantized sensor value (digital: int64_t)
+    logic signed [WIDTH-1:0] sensor_quantized;
+
+    analog begin
+        // Read analog voltage
+        v_sensor_real = V(v_sensor, gnd);
+    end
+
+    // Sample-and-hold on clock edge (Synchronous ADC model)
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            sensor_quantized <= '0;
+        end else begin
+            // Quantize: Scale voltage to int64_t range
+            // Assuming: v_sensor_real in [-1V, +1V] → Q31 format
+            // ADC_LSB = 1mV → 1000 LSBs per volt
+            real v_scaled;
+            v_scaled = v_sensor_real / ADC_LSB;
+            sensor_quantized <= $rtoi(v_scaled);
+        end
+    end
+
+    // ═══ 3. DIGITAL STATE MACHINE (ValidStack Proof = State Behavior) ═══
+
+    typedef enum logic [1:0] {
+        S_IDLE      = 2'b00,
+        S_EXEC      = 2'b01,
+        S_WRITEBACK = 2'b10
+    } state_t;
+
+    state_t state;
+    logic [1:0] opcode_q;
+    logic signed [WIDTH-1:0] imm_q;
+
+    always_ff @(posedge clk or negedge rst_n) begin
+        if (!rst_n) begin
+            sp <= '0;
+            state <= S_IDLE;
+            done <= 1'b0;
+        end else begin
+            done <= 1'b0;
+
+            case (state)
+                S_IDLE: begin
+                    if (start) begin
+                        opcode_q <= opcode;
+                        imm_q <= imm_val;
+                        state <= S_EXEC;
+                    end
+                end
+
+                S_EXEC: begin
+                    unique case (opcode_q)
+                        2'd0: begin  // PUSH x: shift stack, insert x at top
+                            for (int i = sp; i > 0; i--) begin
+                                rf[i] <= rf[i-1];
+                            end
+                            rf[0] <= f_push(imm_q);
+                            sp <= sp + 1;
+                        end
+
+                        2'd1: begin  // DUP: duplicate top
+                            for (int i = sp; i > 0; i--) begin
+                                rf[i] <= rf[i-1];
+                            end
+                            rf[0] <= f_dup(rf[1]);  // After shift, top is at [1]
+                            sp <= sp + 1;
+                        end
+
+                        2'd2: begin  // SWAP: exchange top two (Requires sp >= 2)
+                            begin : swap_block
+                                logic signed [WIDTH-1:0] tmp;
+                                tmp = rf[0];
+                                rf[0] <= rf[1];
+                                rf[1] <= tmp;
+                            end
+                        end
+
+                        2'd3: begin  // ADD: pop two, push sum (Requires sp >= 2)
+                            rf[1] <= f_add(rf[0], rf[1]);
+                            for (int i = 0; i < sp-1; i++) begin
+                                rf[i] <= rf[i+1];
+                            end
+                            sp <= sp - 1;
+                        end
+
+                        default: begin
+                            // Invalid opcode (should not occur if ValidStack proven)
+                        end
+                    endcase
+
+                    state <= S_WRITEBACK;
+                end
+
+                S_WRITEBACK: begin
+                    done <= 1'b1;
+                    state <= S_IDLE;
+                end
+            endcase
+        end
+    end
+
+    // Output: Top-of-Stack
+    assign tos = (sp > 0) ? rf[0] : '0;
+
+    // ═══ 4. ANALOG ACTUATION (DAC Model) ═══
+
+    real v_dac_real;    // De-quantized output voltage
+
+    // Combinational DAC: Convert digital TOS to voltage
+    always_comb begin
+        // De-quantize: int64_t → voltage
+        // Q31 format: divide by ADC scale factor
+        v_dac_real = $itor(tos) * ADC_LSB;
+        // Clamp to [-1V, +1V]
+        if (v_dac_real > 1.0) v_dac_real = 1.0;
+        if (v_dac_real < -1.0) v_dac_real = -1.0;
+    end
+
+    // Analog output with slew rate limiting (Zero-Order Hold + RC)
+    analog begin
+        // DAC Output: Applies computed voltage to v_actuate with controlled slew
+        V(v_actuate, gnd) <+ transition(v_dac_real, 0, DAC_SLEW);
+    end
+
+    // ═══ 5. ASSERTIONS & FORMAL VERIFICATION HOOKS ═══
+
+    // Formal Property 1: Stack Height Bound
+    // ValidStack proof → sp never exceeds MAX_DEPTH
+    // synthesis translate_off
+    always_ff @(posedge clk) begin
+        if (rst_n && state != S_IDLE) begin
+            assert (sp <= MAX_DEPTH)
+                else $error("STACK OVERFLOW DETECTED: ValidStack proof violated!");
+        end
+    end
+    // synthesis translate_on
+
+    // Formal Property 2: Instruction Validity
+    // If opcode=SWAP or ADD, then sp >= 2
+    // synthesis translate_off
+    always_ff @(posedge clk) begin
+        if (rst_n && state == S_EXEC) begin
+            if (opcode_q == 2'd2 || opcode_q == 2'd3) begin
+                assert (sp >= 2)
+                    else $error("INVALID INSTRUCTION: sp < 2 for SWAP/ADD");
+            end
+        end
+    end
+    // synthesis translate_on
+
+    // Coverage directive (for functional coverage)
+    // synthesis translate_off
+    covergroup cg_instr @(posedge clk);
+        cp_opcode: coverpoint opcode_q { bins push = {2'd0}; bins dup = {2'd1}; bins swap = {2'd2}; bins add = {2'd3}; }
+        cp_sp: coverpoint sp { bins low = {[0:3]}; bins mid = {[4:8]}; bins high = {[9:MAX_DEPTH]}; }
+        cross cg_instr: cp_opcode x cp_sp;
+    endgroup
+    initial cg_instr = new();
+    // synthesis translate_on
+
+endmodule : sov_stack_ams
+
+// ═══ 6. TESTBENCH & EXAMPLE USAGE ═══
+/*
+module sov_stack_ams_tb;
+    logic clk, rst_n, start, done;
+    logic [1:0] opcode;
+    logic signed [63:0] imm_val, tos;
+    electrical v_sensor, v_actuate, gnd;
+
+    // Clock generation
+    initial begin
+        clk = 0;
+        forever #5ns clk = ~clk;  // 100 MHz
+    end
+
+    // Instantiate DUT
+    sov_stack_ams #(
+        .MAX_DEPTH(16),
+        .WIDTH(64),
+        .SAMPLE_PERIOD(1e-6)
+    ) dut (
+        .clk(clk),
+        .rst_n(rst_n),
+        .start(start),
+        .opcode(opcode),
+        .imm_val(imm_val),
+        .done(done),
+        .tos(tos),
+        .v_sensor(v_sensor),
+        .v_actuate(v_actuate),
+        .gnd(gnd)
+    );
+
+    // Test sequence: [Push 10, Push 20, Dup, Add]
+    initial begin
+        rst_n = 0;
+        start = 0;
+        #100ns rst_n = 1;
+
+        // Push 10
+        @(posedge clk) begin opcode = 2'd0; imm_val = 64'd10; start = 1; end
+        @(posedge done);
+
+        // Push 20
+        @(posedge clk) begin opcode = 2'd0; imm_val = 64'd20; start = 1; end
+        @(posedge done);
+
+        // Dup
+        @(posedge clk) begin opcode = 2'd1; start = 1; end
+        @(posedge done);
+
+        // Add
+        @(posedge clk) begin opcode = 2'd3; start = 1; end
+        @(posedge done);
+
+        // Check result
+        $display("Final TOS: %d (expected 50)", $signed(tos));
+        $finish;
+    end
+endmodule
+*/

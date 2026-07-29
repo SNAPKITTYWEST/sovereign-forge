@@ -1,0 +1,31 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+// sigma_source.va — Σ(t) Synchronicity Pulse Generator
+module sigma_source(out, gnd);
+    output out; input gnd; electrical out, gnd;
+
+    parameter real VDD = {{ VDD | default(1.8) }};
+    parameter real FREQ = {{ FREQ | default(100e6) }};
+    parameter real PW = {{ PW | default(0.5e-9) }};
+    parameter real TR = {{ TR | default(50e-12) }};
+    parameter real ZOUT = {{ ZOUT | default(50) }};
+    parameter real JITTER_RMS = {{ JITTER_RMS | default(5e-12) }};
+
+    real t_next_edge;
+    integer cycle_count;
+
+    analog begin
+        @(initial_step) begin
+            t_next_edge = 0;
+            cycle_count = 0;
+        end
+        @(timer(t_next_edge)) begin
+            t_next_edge = $abstime + (1.0/FREQ) + $rdist_normal(0, JITTER_RMS);
+            cycle_count = cycle_count + 1;
+        end
+        V(out, gnd) <+ transition(
+            (($abstime % (1.0/FREQ)) < PW) ? VDD : 0.0, 0, TR
+        ) + I(out, gnd) * ZOUT;
+    end
+endmodule

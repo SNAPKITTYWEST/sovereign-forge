@@ -1,0 +1,164 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#0a0a0a"/>
+      <stop offset="100%" style="stop-color:#0d1a12"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00ffaa;stop-opacity:0"/>
+      <stop offset="50%" style="stop-color:#00ffaa;stop-opacity:0.15"/>
+      <stop offset="100%" style="stop-color:#00ffaa;stop-opacity:0"/>
+    </linearGradient>
+    <filter id="blur">
+      <feGaussianBlur stdDeviation="3"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <!-- Grid lines -->
+  <g stroke="#0a2a15" stroke-width="0.5" opacity="0.4">
+    <line x1="0" y1="100" x2="1200" y2="100"/>
+    <line x1="0" y1="200" x2="1200" y2="200"/>
+    <line x1="0" y1="300" x2="1200" y2="300"/>
+    <line x1="0" y1="400" x2="1200" y2="400"/>
+    <line x1="0" y1="500" x2="1200" y2="500"/>
+    <line x1="200" y1="0" x2="200" y2="630"/>
+    <line x1="400" y1="0" x2="400" y2="630"/>
+    <line x1="600" y1="0" x2="600" y2="630"/>
+    <line x1="800" y1="0" x2="800" y2="630"/>
+    <line x1="1000" y1="0" x2="1000" y2="630"/>
+  </g>
+
+  <!-- Glow line -->
+  <rect x="0" y="98" width="1200" height="4" fill="url(#glow)" opacity="0.6"/>
+
+  <!-- Title -->
+  <text x="600" y="70" text-anchor="middle" font-family="'Courier New', monospace" font-size="42" font-weight="bold" fill="#00ffaa" letter-spacing="12">EXO-SYNCHRONICITY</text>
+  <text x="600" y="95" text-anchor="middle" font-family="'Courier New', monospace" font-size="14" fill="#557766" letter-spacing="4">ENVIRONMENT AS COMPUTE SUBSTRATE</text>
+
+  <!-- Pipeline flow -->
+  <g transform="translate(60, 140)">
+    <!-- Stage boxes -->
+    <rect x="0" y="0" width="140" height="70" rx="6" fill="#0a1a10" stroke="#1a4a2a" stroke-width="1"/>
+    <text x="70" y="25" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#00ffcc" font-weight="bold">01 PROLOG</text>
+    <text x="70" y="42" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">binds/2</text>
+    <text x="70" y="55" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">valid_operator/2</text>
+
+    <text x="155" y="38" text-anchor="middle" font-family="'Courier New', monospace" font-size="16" fill="#1a5a3a">→</text>
+
+    <rect x="170" y="0" width="140" height="70" rx="6" fill="#0a1a10" stroke="#1a4a2a" stroke-width="1"/>
+    <text x="240" y="25" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#00ffcc" font-weight="bold">02 REACHABILITY</text>
+    <text x="240" y="42" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">Datalog / Souffle</text>
+    <text x="240" y="55" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">P-time verifier</text>
+
+    <text x="325" y="38" text-anchor="middle" font-family="'Courier New', monospace" font-size="16" fill="#1a5a3a">→</text>
+
+    <rect x="340" y="0" width="140" height="70" rx="6" fill="#0a1a10" stroke="#1a4a2a" stroke-width="1"/>
+    <text x="410" y="25" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#00ffcc" font-weight="bold">03 ASP WORLDS</text>
+    <text x="410" y="42" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">Stable models</text>
+    <text x="410" y="55" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">NP-hard search</text>
+
+    <text x="495" y="38" text-anchor="middle" font-family="'Courier New', monospace" font-size="16" fill="#1a5a3a">→</text>
+
+    <rect x="510" y="0" width="140" height="70" rx="6" fill="#0a1a10" stroke="#1a4a2a" stroke-width="1"/>
+    <text x="580" y="25" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#00ffcc" font-weight="bold">04 SMT TIMING</text>
+    <text x="580" y="42" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">Z3 feasibility</text>
+    <text x="580" y="55" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">voltage margins</text>
+
+    <text x="665" y="38" text-anchor="middle" font-family="'Courier New', monospace" font-size="16" fill="#1a5a3a">→</text>
+
+    <rect x="680" y="0" width="140" height="70" rx="6" fill="#0a1a10" stroke="#1a4a2a" stroke-width="1"/>
+    <text x="750" y="25" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#00ffcc" font-weight="bold">05 NETLISTER</text>
+    <text x="750" y="42" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">Verilog-A mesh</text>
+    <text x="750" y="55" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">Prolog → wires</text>
+
+    <text x="835" y="38" text-anchor="middle" font-family="'Courier New', monospace" font-size="16" fill="#1a5a3a">→</text>
+
+    <rect x="850" y="0" width="140" height="70" rx="6" fill="#0a1a10" stroke="#1a4a2a" stroke-width="1"/>
+    <text x="920" y="25" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#00ffcc" font-weight="bold">06 SIMULATION</text>
+    <text x="920" y="42" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">Spectre / Xyce</text>
+    <text x="920" y="55" text-anchor="middle" font-family="'Courier New', monospace" font-size="9" fill="#668877">skew · droop · noise</text>
+  </g>
+
+  <!-- Theorem kernel section -->
+  <rect x="60" y="240" width="1080" height="220" rx="8" fill="#050a05" stroke="#1a3a1a" stroke-width="1"/>
+  <text x="80" y="270" font-family="'Courier New', monospace" font-size="16" fill="#00ffaa" font-weight="bold">THEOREM KERNEL</text>
+  <text x="260" y="270" font-family="'Courier New', monospace" font-size="11" fill="#445544">machine-checked in Isabelle/HOL + Lean 4</text>
+
+  <!-- Theorem 1 -->
+  <g transform="translate(80, 290)">
+    <text x="0" y="0" font-family="'Courier New', monospace" font-size="12" fill="#00ff88">✓</text>
+    <text x="20" y="0" font-family="'Courier New', monospace" font-size="12" fill="#00ddaa" font-weight="bold">Topology Preservation</text>
+    <text x="260" y="0" font-family="'Courier New', monospace" font-size="10" fill="#667766">same facts → equivalent topology</text>
+  </g>
+
+  <!-- Theorem 2 -->
+  <g transform="translate(80, 318)">
+    <text x="0" y="0" font-family="'Courier New', monospace" font-size="12" fill="#00ff88">✓</text>
+    <text x="20" y="0" font-family="'Courier New', monospace" font-size="12" fill="#00ddaa" font-weight="bold">Reachability Preservation</text>
+    <text x="260" y="0" font-family="'Courier New', monospace" font-size="10" fill="#667766">paths invariant across builds</text>
+  </g>
+
+  <!-- Theorem 3 -->
+  <g transform="translate(80, 346)">
+    <text x="0" y="0" font-family="'Courier New', monospace" font-size="12" fill="#00ff88">✓</text>
+    <text x="20" y="0" font-family="'Courier New', monospace" font-size="12" fill="#00ddaa" font-weight="bold">No Floating Ports</text>
+    <text x="260" y="0" font-family="'Courier New', monospace" font-size="10" fill="#667766">every node has incident edge</text>
+  </g>
+
+  <!-- Theorem 4 -->
+  <g transform="translate(600, 290)">
+    <text x="0" y="0" font-family="'Courier New', monospace" font-size="12" fill="#00ff88">✓</text>
+    <text x="20" y="0" font-family="'Courier New', monospace" font-size="12" fill="#00ddaa" font-weight="bold">Conduction Soundness</text>
+    <text x="260" y="0" font-family="'Courier New', monospace" font-size="10" fill="#667766">conductance matches annotation</text>
+  </g>
+
+  <!-- Theorem 5 -->
+  <g transform="translate(600, 318)">
+    <text x="0" y="0" font-family="'Courier New', monospace" font-size="12" fill="#00ff88">✓</text>
+    <text x="20" y="0" font-family="'Courier New', monospace" font-size="12" fill="#00ddaa" font-weight="bold">WORM Receipt Determinism</text>
+    <text x="260" y="0" font-family="'Courier New', monospace" font-size="10" fill="#667766">identical inputs → identical receipts</text>
+  </g>
+
+  <!-- Code sample -->
+  <g transform="translate(80, 375)">
+    <rect x="0" y="0" width="520" height="65" rx="4" fill="#030803" stroke="#1a2a1a" stroke-width="0.5"/>
+    <text x="12" y="18" font-family="'Courier New', monospace" font-size="10" fill="#00ddaa">theorem topology_preservation:</text>
+    <text x="12" y="32" font-family="'Courier New', monospace" font-size="10" fill="#557766">  "PureFactFile F ⟹</text>
+    <text x="12" y="46" font-family="'Courier New', monospace" font-size="10" fill="#557766">   TopologyEquivalent (BuildTopology F) (BuildTopology F)"</text>
+    <text x="12" y="60" font-family="'Courier New', monospace" font-size="10" fill="#008866">  by (rule topology_preservation_aux)</text>
+  </g>
+
+  <!-- Status badge -->
+  <g transform="translate(640, 380)">
+    <rect x="0" y="0" width="200" height="28" rx="14" fill="#00ffaa11" stroke="#00ffaa44" stroke-width="1"/>
+    <text x="100" y="19" text-anchor="middle" font-family="'Courier New', monospace" font-size="11" fill="#00ffaa">0 sorry · 0 admit · 0 oops</text>
+  </g>
+
+  <!-- Bottom bar -->
+  <rect x="0" y="490" width="1200" height="1" fill="#1a3a2a"/>
+  <rect x="0" y="488" width="1200" height="4" fill="url(#glow)" opacity="0.3"/>
+
+  <!-- Slogan -->
+  <text x="600" y="530" text-anchor="middle" font-family="'Courier New', monospace" font-size="16" fill="#00ffaa" font-weight="bold">Syntax is liability. Semantics are truth. Proof is the receipt.</text>
+
+  <!-- Links -->
+  <text x="600" y="565" text-anchor="middle" font-family="'Courier New', monospace" font-size="12" fill="#445544">SNAPKITTYWEST/exo-synchronicity  ·  SNAPKITTYWEST/mathrosetta</text>
+
+  <!-- Corner decorations -->
+  <g stroke="#1a4a2a" stroke-width="1" fill="none">
+    <polyline points="20,20 20,40"/>
+    <polyline points="20,20 40,20"/>
+    <polyline points="1180,20 1180,40"/>
+    <polyline points="1180,20 1160,20"/>
+    <polyline points="20,610 20,590"/>
+    <polyline points="20,610 40,610"/>
+    <polyline points="1180,610 1180,590"/>
+    <polyline points="1180,610 1160,610"/>
+  </g>
+
+  <!-- Version tag -->
+  <text x="1140" y="600" text-anchor="end" font-family="'Courier New', monospace" font-size="10" fill="#334433">v0.2.0</text>
+</svg>

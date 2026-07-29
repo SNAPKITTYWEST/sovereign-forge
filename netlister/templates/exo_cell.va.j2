@@ -1,0 +1,29 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module exo_cell(sig, port_p, port_pn, op_gate, gnd);
+    inout sig, port_p, port_pn, op_gate, gnd;
+    electrical sig, port_p, port_pn, op_gate, gnd;
+
+    parameter real VTH = {{ VTH | default(0.6) }};
+    parameter real VTH_NOISE = {{ VTH_NOISE | default(0.02) }};
+    parameter real RON = {{ RON | default(50) }};
+    parameter real ROFF = {{ ROFF | default(1e12) }};
+    parameter real CIN = {{ CIN | default(2e-15) }};
+
+    real vth_p_eff, vth_pn_eff;
+
+    @(initial_step) begin
+        vth_p_eff = VTH + $rdist_normal(0, VTH_NOISE);
+        vth_pn_eff = VTH + $rdist_normal(0, VTH_NOISE);
+    end
+
+    analog begin
+        I(sig, gnd) <+ ddt(V(sig, gnd) * CIN);
+        I(sig, op_gate) <+ V(sig, op_gate) /
+                           (V(port_p, gnd) > vth_p_eff ? RON : ROFF);
+        I(sig, op_gate) <+ V(sig, op_gate) /
+                           (V(port_pn, gnd) < vth_pn_eff ? RON : ROFF);
+        I(op_gate, gnd) <+ V(op_gate, gnd) / 1e9;
+    end
+endmodule

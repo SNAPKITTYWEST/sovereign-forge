@@ -1,0 +1,37 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+// exo_mesh_3cell_tb.va — 3-cell P/PN Swarm testbench
+// Generated from prolog/examples/three_cell_mesh.pl
+module exo_mesh_3cell_tb();
+    electrical sigma_net, gnd;
+    electrical op_gate_0, op_gate_1, op_gate_2;
+    electrical env_p_0, env_pn_0;
+    electrical env_p_1, env_pn_1;
+    electrical env_p_2, env_pn_2;
+
+    ground gnd;
+
+    sigma_source SIGMA_SRC(.out(sigma_net), .gnd(gnd));
+
+    electrical bus_node_0, bus_node_1, bus_node_2;
+    lossy_bus_segment BUS0(.in(sigma_net), .out(bus_node_0), .gnd(gnd));
+    lossy_bus_segment BUS1(.in(bus_node_0), .out(bus_node_1), .gnd(gnd));
+    lossy_bus_segment BUS2(.in(bus_node_1), .out(bus_node_2), .gnd(gnd));
+
+    // Cell 0: P=HIGH -> conducts (positive filter)
+    exo_cell CELL_0(.sig(bus_node_0), .port_p(env_p_0), .port_pn(env_pn_0),
+                    .op_gate(op_gate_0), .gnd(gnd));
+    // Cell 1: PN=LOW -> conducts (negative filter)
+    exo_cell CELL_1(.sig(bus_node_1), .port_p(env_p_1), .port_pn(env_pn_1),
+                    .op_gate(op_gate_1), .gnd(gnd));
+    // Cell 2: P=LOW, PN=HIGH -> blocked
+    exo_cell CELL_2(.sig(bus_node_2), .port_p(env_p_2), .port_pn(env_pn_2),
+                    .op_gate(op_gate_2), .gnd(gnd));
+
+    analog begin
+        V(env_p_0, gnd) <+ 1.8;   V(env_pn_0, gnd) <+ 1.8;
+        V(env_p_1, gnd) <+ 0.0;   V(env_pn_1, gnd) <+ 0.0;
+        V(env_p_2, gnd) <+ 0.0;   V(env_pn_2, gnd) <+ 1.8;
+    end
+endmodule

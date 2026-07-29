@@ -1,0 +1,22 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+module lossy_bus_segment(in, out, gnd);
+    inout in, out, gnd; electrical in, out, gnd;
+
+    parameter real R_PER_UM = {{ R_PER_UM | default(0.1) }};
+    parameter real C_PER_UM = {{ C_PER_UM | default(0.2e-15) }};
+    parameter real L_PER_UM = {{ L_PER_UM | default(0.2e-12) }};
+    parameter real LENGTH = {{ LENGTH | default(500) }};
+
+    electrical n_mid;
+
+    analog begin
+        I(in, n_mid) <+ (V(in, n_mid) / (R_PER_UM * LENGTH))
+                        + ddt(V(in, n_mid) * (L_PER_UM * LENGTH));
+        I(n_mid, gnd) <+ ddt(V(n_mid, gnd) * (C_PER_UM * LENGTH / 2.0));
+        I(n_mid, out) <+ (V(n_mid, out) / (R_PER_UM * LENGTH))
+                         + ddt(V(n_mid, out) * (L_PER_UM * LENGTH));
+        I(out, gnd) <+ ddt(V(out, gnd) * (C_PER_UM * LENGTH / 2.0));
+    end
+endmodule

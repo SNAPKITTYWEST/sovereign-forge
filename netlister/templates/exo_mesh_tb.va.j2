@@ -1,0 +1,44 @@
+`include "constants.vams"
+`include "disciplines.vams"
+
+// exo_mesh_tb.va — Generated from {{ source }}
+module exo_mesh_{{ num_cells }}cell_tb();
+    electrical sigma_net, gnd;
+{% for cell in cells %}
+    electrical op_gate_{{ cell.idx }};
+{% endfor %}
+{% for cell in cells %}
+    {% if cell.p_port %}electrical env_p_{{ cell.idx }};{% endif %}
+    {% if cell.pn_port %}electrical env_pn_{{ cell.idx }};{% endif %}
+{% endfor %}
+    ground gnd;
+
+    sigma_source SIGMA_SRC(.out(sigma_net), .gnd(gnd));
+
+{% for cell in cells %}
+    electrical bus_node_{{ cell.idx }};
+{% endfor %}
+{% for cell in cells %}
+    {% if loop.first %}
+    lossy_bus_segment BUS{{ cell.idx }}(.in(sigma_net), .out(bus_node_{{ cell.idx }}), .gnd(gnd));
+    {% else %}
+    lossy_bus_segment BUS{{ cell.idx }}(.in(bus_node_{{ cell.idx - 1 }}), .out(bus_node_{{ cell.idx }}), .gnd(gnd));
+    {% endif %}
+{% endfor %}
+
+{% for cell in cells %}
+    exo_cell CELL_{{ cell.idx }}(
+        .sig(bus_node_{{ cell.idx }}),
+        .port_p({% if cell.p_port %}env_p_{{ cell.idx }}{% else %}gnd{% endif %}),
+        .port_pn({% if cell.pn_port %}env_pn_{{ cell.idx }}{% else %}gnd{% endif %}),
+        .op_gate(op_gate_{{ cell.idx }}), .gnd(gnd)
+    );
+{% endfor %}
+
+    analog begin
+{% for cell in cells %}
+        {% if cell.p_port and cell.p_voltage is defined %}V(env_p_{{ cell.idx }}, gnd) <+ {{ cell.p_voltage }};{% endif %}
+        {% if cell.pn_port and cell.pn_voltage is defined %}V(env_pn_{{ cell.idx }}, gnd) <+ {{ cell.pn_voltage }};{% endif %}
+{% endfor %}
+    end
+endmodule
