@@ -1,0 +1,101 @@
+Sovereign Forge — Dual License
+
+================================================================================
+SOVEREIGN SOURCE LICENSE
+================================================================================
+
+Copyright (c) 2026 SnapKitty Collective LLC. All rights reserved.
+
+These engines are provided under a Sovereign Source license for commercial use.
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to:
+
+1. Use the Software for any commercial purpose
+2. Modify the Software for internal use
+3. Deploy the Software in production environments
+
+Subject to the following conditions:
+
+1. The above copyright notice and this permission notice shall be included in
+   all copies or substantial portions of the Software.
+2. Commercial redistribution requires explicit written permission from the
+   copyright holder.
+3. These engines are for commercial licensees only. Academic and open-source
+   projects must use the Business Source License (see below).
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+
+================================================================================
+BUSINESS SOURCE LICENSE 1.1 (Change Date: December 31, 2027)
+================================================================================
+
+Terms of the Business Source License 1.1
+
+Licensor: SnapKitty Collective LLC
+Licensed Work: Sovereign Forge
+
+The Licensed Work is © 2026 SnapKitty Collective LLC.
+
+1. Grant of Rights
+   Subject to the terms and conditions of this License, Licensor hereby grants
+   to each recipient of the Licensed Work a non-exclusive, worldwide,
+   royalty-free, fully-paid-up, non-transferable license to do the following:
+
+   a) Run the Licensed Work;
+   b) Modify the Licensed Work and perform services relating to the Licensed
+      Work;
+   c) Display the Licensed Work;
+   d) Benchmark or perform testing of the Licensed Work for non-competitive
+      purposes.
+
+   You may not sublicense or transfer the Licensed Work under these terms.
+   You may not use the Licensed Work for competitive purposes.
+
+2. Effective Date
+   The license grants in Section 1 become effective on January 1, 2028
+   (the "Change Date").
+
+   For any Licensed Work, after the Change Date, Licensor will make the
+   Licensed Work available under an open-source license.
+
+3. Additional Terms
+   a) The Licensed Work shall not be used, in whole or in part, by any
+      entity to provide a competing product or service.
+   b) Any modifications you make must retain all copyright, patent, and
+      trademark notices.
+   c) You may not circumvent technical protection measures in the
+      Licensed Work.
+
+4. Grant of Patent License
+   Licensor grants a license to any patents that Licensor has the right to
+   license which are necessarily infringed by your exercise of any rights
+   under this License. However, you may not practice any patent not
+   necessarily infringed by the Licensed Work.
+
+5. Disclaimer
+   THE LICENSED WORK IS PROVIDED ON AN "AS-IS" BASIS. LICENSOR HEREBY
+   DISCLAIMS ALL WARRANTIES AND CONDITIONS, EXPRESS, IMPLIED, STATUTORY,
+   OR OTHERWISE, AND SPECIFICALLY DISCLAIMS ANY WARRANTY OF
+   MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND
+   NON-INFRINGEMENT.
+
+6. Limitation of Liability
+   IN NO EVENT SHALL LICENSOR BE LIABLE FOR ANY SPECIAL, INDIRECT,
+   INCIDENTAL, CONSEQUENTIAL, PUNITIVE, OR EXEMPLARY DAMAGES, WHETHER
+   ARISING OUT OF THIS LICENSE OR OTHERWISE, EVEN IF LICENSOR HAS BEEN
+   ADVISED OF THE POSSIBILITY OF SUCH DAMAGES.
+
+================================================================================
+LICENSE SUMMARY
+================================================================================
+
+For commercial use:    Sovereign Source License
+For academic/OSS:      Business Source License (free after Dec 31, 2027)
+For competitive use:   Explicit written permission required
+
+Contact: licensing@snapkittywest.dev
+
+================================================================================
