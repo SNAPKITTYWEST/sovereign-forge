@@ -1,229 +1,269 @@
 # Sovereign Forge
 
 <p align="center">
+  <strong>Deterministic proof verification for exact linear-algebra compute.</strong>
+</p>
+
+<p align="center">
+  Exact arithmetic · Overflow detection · Typed obligations · Canonical certificates · WORM receipts
+</p>
+
+---
+
+## What This Is
+
+Sovereign Forge is a compact verification kernel for checking mathematical witnesses produced by stack machines, numerical runtimes, compilers, and autonomous agents.
+
+**Current status:** Exact verifier kernel is implemented and tested. Typed execution, certificate, and WORM layers are under development.
+
+---
+
+## The Verification Problem
+
+Most compute systems ask you to trust:
+- the runtime
+- the machine  
+- the library
+- the model
+- the operator
+
+Sovereign Forge separates computation from verification:
+
+<p align="center">
   <img
     src="docs/assets/sovereign-forge-kernel.svg"
     alt="Sovereign Forge exact proof verification kernel"
     width="100%" />
 </p>
 
+
+```text
+UNTRUSTED COMPUTE
+  Result + Witness
+      ↓
+SOVEREIGN FORGE KERNEL
+  • Validate dimensions
+  • Recompute invariant
+  • Detect overflow
+  • Emit proof outcome
+      ↓
+  CERTIFICATE + RECEIPT
+```
+
 ---
 
-**Sovereign Forge (FORGE)** is a production-grade verifier for matrix computations with exact int64_t arithmetic, cryptographic proofs, and tamper-evident receipts. It proves that A*X = I, A*x = b, and A^T(A*x - b) = 0 hold exactly without floating-point approximation or unverifiable claims.
+## Status Matrix
 
-## Quick Start
+| Component | Status | Notes |
+|-----------|--------|-------|
+| **Exact matrix verifier** | ✅ Working | VerifyInv, VerifySol, VerifyLstsq |
+| **Overflow-checked arithmetic** | ✅ Working | `__builtin_*_overflow` on all ops |
+| **Conformance tests** | ✅ Passing | 11/11 PASS |
+| **Adversarial tests** | ✅ Passing | 31/31 PASS, 21/21 attacks detected |
+| **Lean proofs** | ✅ Available | 8 theorems PROVED, zero sorry |
+| **Typed stack execution** | 🔄 Stubbed | Push/pop/peek currently return NULL |
+| **Type inference** | 🔄 Stubbed | Returns NULL, no shape unification |
+| **Proof obligations** | 🔄 Stubbed | Not implemented |
+| **CBOR certificates** | 🔄 Stubbed | Not implemented |
+| **Receipt signing** | 🔄 Stubbed | Not implemented |
+| **WORM receipts** | 🔄 Stubbed | Not implemented |
 
-```bash
-git clone https://github.com/SNAPKITTYWEST/sovereign-forge
-cd sovereign-forge
-make -f netlister/Makefile.sov all
-make -f netlister/Makefile.sov test
-```
+**Honest statement:** The exact verifier core is production-usable as an experimental library. The complete typed-execution, certificate, and WORM pipeline is not yet released as a stable interface.
 
-```c
-#include "src/verifier/sov_verifier.h"
-int main(void) {
-    int64_t I[] = {1, 0, 0, 1};
-    VerifyResult res = sov_verify_inv(I, 4, I, 4, 2);
-    return (res == VER_PASS) ? 0 : 1;
-}
-```
+---
 
-## What This Is
+## What Works Now
 
-Sovereign Forge accepts results and witnesses from untrusted compute (AI agents, remote solvers, distributed systems), independently verifies the defining mathematical invariants using exact integer arithmetic, and produces auditable proof artifacts sealed with cryptographic signatures.
+### Exact arithmetic verification
 
-## Core Verifications
+The kernel operates over `int64_t` with:
+- **no floating-point epsilon**
+- **no hidden tolerance**
+- **no approximate equality**
+- **no silent wraparound**
 
-- **`sov_verify_inv(A, X, n)`** — Prove A × X = I (matrix inverse)
-- **`sov_verify_sol(A, x, b, m, n)`** — Prove A × x = b (linear system)
-- **`sov_verify_lstsq(A, x, b, m, n)`** — Prove Aᵀ(Ax − b) = 0 (least-squares)
+Every multiplication, addition, subtraction is checked for overflow.
 
-All use exact int64_t arithmetic. No epsilon. No tolerance. Overflow is detected and reported separately.
-
-## Five-Layer Architecture
-
-| Layer | Purpose | Status |
-|-------|---------|--------|
-| **L1: Exact Verifier Core** | VerifyInv, VerifySol, VerifyLstsq with overflow checks | ✅ IMPLEMENTED |
-| **L2: Typed Execution** | Stack machine with type inference (Γ ⊢ i ↓ τ, O, Γ') | ✅ IMPLEMENTED |
-| **L3: Proof Obligations** | Obligation generation per instruction | ✅ IMPLEMENTED |
-| **L4: Proof Certificates** | RFC 8949 CBOR serialization, Blake3 hashing | ✅ IMPLEMENTED |
-| **L5: WORM Receipt** | Ed25519 signing, parent hash linkage, replay protection | ✅ IMPLEMENTED |
-
-## Documentation
-
-- **[README.md](README.md)** — This file
-- **[USER_GUIDE.md](docs/USER_GUIDE.md)** — Installation, 5 runnable examples, troubleshooting
-- **[DEVELOPER.md](docs/DEVELOPER.md)** — Architecture deep dive, formal semantics, contributing
-- **[SECURITY.md](docs/SECURITY.md)** — Threat model, what we prove, responsible disclosure
-- **[ARCHITECTURE.md](docs/ARCHITECTURE.md)** — Layer diagrams and data flow
-
-## API Reference
-
-### Safe Allocation
+### Inverse verification
 
 ```c
-SafeMatrix* safe_alloc_matrix(size_t rows, size_t cols);
-void safe_free_matrix(SafeMatrix *m);
+verify_inv(A, X)  // Check: A × X = I
 ```
 
-### Verification
+### Linear-system verification
 
 ```c
-VerifyResult sov_verify_inv(
-    const int64_t *A, size_t A_len,
-    const int64_t *X, size_t X_len,
-    size_t n
-);
-
-VerifyResult sov_verify_sol(
-    const int64_t *A, size_t A_len,
-    const int64_t *x, size_t x_len,
-    const int64_t *b, size_t b_len,
-    size_t m, size_t n
-);
-
-VerifyResult sov_verify_lstsq(
-    const int64_t *A, size_t A_len,
-    const int64_t *x, size_t x_len,
-    const int64_t *b, size_t b_len,
-    size_t m, size_t n
-);
+verify_sol(A, x, b)  // Check: A × x = b
 ```
 
-### Certificates & Receipts
+### Least-squares verification
 
 ```c
-Certificate* cert_create(int version, const char *isa_version, const char *mode);
-void cert_add_obligation(Certificate *c, Obligation *o);
-void cert_finalize(Certificate *c);
-
-uint8_t* sign_receipt(Receipt *r, const uint8_t sk[32]);
-bool verify_signature(const Receipt *r, const uint8_t pk[32], const uint8_t sig[64]);
+verify_lstsq(A, x, b)  // Check: Aᵀ(Ax − b) = 0
 ```
 
-## Test Suite
+---
 
-**77+ Tests Passing:**
-- Phase 1: 42 conformance + 31 adversarial = **73 tests**
-- Phase 2: 12 typecheck tests
-- Phase 3: 10 certificate tests
-- Phase 4: 8 receipt tests
-- Phase 5: 5 refinement tests
+## Architecture
 
-**Quality:**
-- ✅ ASan/UBSan clean
-- ✅ libFuzzer: 10+ seconds fuzzing, no crashes
-- ✅ 15 Lean 4 theorems proved (zero sorry)
-- ✅ Reproducible builds
+```text
+┌────────────────────────────────────────────┐
+│   WORM Receipt Layer (STUBBED/PLANNED)     │
+├────────────────────────────────────────────┤
+│  Proof Certificates (STUBBED/IN DEVELOPMENT)
+├────────────────────────────────────────────┤
+│  Proof Obligations (STUBBED/IN DEVELOPMENT)
+├────────────────────────────────────────────┤
+│  Typed Execution (STUBBED/IN DEVELOPMENT)
+├────────────────────────────────────────────┤
+│  Exact Verification Kernel (✅ WORKING)    │
+│  VerifyInv · VerifySol · VerifyLstsq      │
+│  Overflow checked · Deterministic          │
+└────────────────────────────────────────────┘
+```
 
-## Formal Verification
+Only the bottom layer is complete and directly usable.
 
-8 Lean 4 theorems proved for the stack machine:
-- `stack_safety`: Operations preserve invariants
-- `determinism`: Same input → same output
-- `type_preservation`: Types don't change during execution
-- And 5 more covering overflow, bounds, and correctness
+---
 
-**C Refinement Proofs** (15 theorems):
-- RefinesInv, RefinesSol, RefinesLstsq
-- CBOR canonical encoding, Blake3 deterministic, Ed25519 unforgeable
-
-## Specifications (Frozen)
-
-- [instruction-semantics.md](spec/instruction-semantics.md) — Complete ISA definition
-- [type-rules.md](spec/type-rules.md) — Formal type judgment system
-- [verification-policy.md](spec/verification-policy.md) — Exact arithmetic rules
-- [proof-certificate.schema.json](spec/proof-certificate.schema.json) — RFC 8949 schema
-
-## Security Properties
-
-**What We Prove:**
-- ✅ Exact int64_t arithmetic (no floating-point)
-- ✅ Overflow detection (mandatory)
-- ✅ Deterministic verification (same input → same output)
-- ✅ Proof obligation tracking
-- ✅ Cryptographic receipt sealing
-
-**What We Don't Prove:**
-- ❌ Remote code execution prevention (runtime boundary only)
-- ❌ Upstream solver correctness (we verify the *result*, not the *method*)
-- ❌ Claims about external systems
-
-## Production Status
-
-**v1.0.0: RELEASED**
-
-| Component | Status |
-|-----------|--------|
-| Exact verifier core | ✅ STABLE |
-| Type inference engine | ✅ STABLE |
-| Proof obligation generation | ✅ STABLE |
-| CBOR certificate serialization | ✅ STABLE |
-| Ed25519 receipt signing | ✅ STABLE |
-| Reproducible builds | ✅ VERIFIED |
-| Formal refinement proofs | ✅ COMPLETE |
-
-## Build
+## Build & Test
 
 ### Requirements
-- GCC 9+ or Clang 10+
-- C99 standard library
+
+- C compiler with `__builtin_*_overflow` support
 - GNU Make
-- (Optional) Lean 4 for proof verification
+- 64-bit platform
 
 ### Compile
 
 ```bash
-make -f netlister/Makefile.sov all
+make -f netlister/Makefile.sov
 ```
 
-### Test
+### Run tests
 
 ```bash
-make -f netlister/Makefile.sov test           # Standard tests
-make -f netlister/Makefile.sov test-asan      # With AddressSanitizer
-make -f netlister/Makefile.sov run-fuzzer     # libFuzzer
+make -f netlister/Makefile.sov test
+# Output: 42/42 PASS (11 conformance + 31 adversarial)
 ```
-
-## Roadmap
-
-- **v1.0.0** ✅ RELEASED — Exact verification, formal proofs, cryptographic receipts
-- **v1.1.0** — Rational arithmetic domain support
-- **v1.2.0** — Hardware attestation (TPM integration)
-- **v2.0.0** — Distributed verification (multi-node consensus)
-
-## Contributing
-
-See [DEVELOPER.md](docs/DEVELOPER.md) for:
-- Code style (C99, K&R)
-- Contributing workflow
-- Security review checklist
-- Release process
-
-## License
-
-Apache 2.0 — See [LICENSE](LICENSE)
-
-**Attribution:**
-- Mathematical architecture: Ahmad Ali Parr
-- Implementation & Phases 2–5: Claude Haiku 4.5
-- Coordination: Jessica Westerhoff
 
 ---
 
-## Cross-Repository References
+## API (Experimental)
 
-**Derived from:**
-- [qataaum/personas](https://github.com/qataaum/personas) — Stack machine semantics
-- [SNAPKITTYWEST/sov-kernel-monster](https://github.com/SNAPKITTYWEST/sov-kernel-monster) — Formal verification
+```c
+typedef enum {
+  VER_PASS = 0,
+  VER_FAIL = 1,
+  VER_OVERFLOW = 2,
+  VER_SHAPE_MISMATCH = 3,
+  VER_NULL_INPUT = 4,
+  VER_ALLOC_FAILURE = 5
+} VerifyResult;
 
-**Related projects:**
-- [SNAPKITTYWEST/sovereign-transformer](https://github.com/SNAPKITTYWEST/sovereign-transformer) — Full inference pipeline
-- [SNAPKITTYWEST/snapkitty-mcp](https://github.com/SNAPKITTYWEST/snapkitty-mcp) — MCP tool integration
+VerifyResult sov_verify_inv(const int64_t *A, const int64_t *X, size_t n);
+VerifyResult sov_verify_sol(const int64_t *A, const int64_t *x, const int64_t *b, size_t m, size_t n);
+VerifyResult sov_verify_lstsq(const int64_t *A, const int64_t *x, const int64_t *b, size_t m, size_t n);
+```
+
+Row-major matrix layout. Caller responsible for buffer sizes.
+
+---
+
+## Production Blockers (P0)
+
+Before any production deployment:
+
+1. **Allocation overflow** — `malloc(n * n * sizeof(int64_t))` can wrap
+2. **No buffer-length validation** — Pointers alone don't prove array bounds
+3. **No resource bounds** — Remote size can exhaust CPU/memory
+4. **Certificate/WORM are stubs** — No actual hashing, serialization, signing
+5. **Type inference not implemented** — Programs cannot yet be validated
+
+---
+
+## Roadmap to v1.0.0
+
+### v0.1.0: Kernel hardening
+- [ ] Buffer-size overflow protection
+- [ ] Allocation-failure errors
+- [ ] ASan/UBSan clean
+- [ ] Fuzz testing harness
+
+### v0.2.0: Typed execution
+- [ ] Stack push/pop/peek implementation
+- [ ] Type inference engine
+- [ ] Shape unification
+
+### v0.3.0: Proof artifacts  
+- [ ] Obligation generation
+- [ ] Canonical CBOR serialization
+- [ ] Deterministic hashing
+
+### v0.4.0: Provenance
+- [ ] Ed25519 signing
+- [ ] WORM receipt chaining
+- [ ] Replay protection
+
+### v1.0.0: Formal refinement
+- [ ] Lean-to-C verification
+- [ ] Reproducible builds
+- [ ] External security audit
+
+---
+
+## Security Properties
+
+**Currently provides:**
+- Deterministic outcomes
+- Exact equality checks
+- Arithmetic-overflow detection
+- Small audit surface
+
+**Not yet provided:**
+- Buffer-length validation
+- Resource bounds
+- Cryptographic sealing
+- Hardware attestation
+- ABI versioning
+
+---
+
+## Repository Layout
+
+```
+src/verifier/       ✅ Exact kernel (STABLE)
+src/typecheck/      🔄 Type system (STUBBED)
+src/obligations/    🔄 Obligations (STUBBED)
+src/certificate/    🔄 Certificates (STUBBED)
+
+spec/               ✅ Frozen Phase 1 specifications
+proofs/lean4/       ✅ Stack-machine proofs (8 PROVED)
+
+tests/
+  conformance/      ✅ 11/11 PASS
+  adversarial/      ✅ 31/31 PASS
+
+netlister/          📋 Experimental extraction
+veriloga/           📋 Experimental mixed-signal
+docs/               Architecture & audit material
+```
+
+---
+
+## License
+
+Apache 2.0
+
+---
+
+## Core Principle
+
+> Compute may be untrusted. Verification must be small enough to inspect.
 
 ---
 
 **Sovereign Forge**  
-*Untrusted compute in. Verified invariants out. Auditable receipts sealed.*
+Exact verification kernel for linear-algebra witnesses.
+
+*Cracked by Ahmad Ali Parr. Implemented by Claude Haiku 4.5. Validated by Opus 5.*
