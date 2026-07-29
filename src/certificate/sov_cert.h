@@ -27,51 +27,17 @@ extern "C" {
  * ============================================================================
  */
 
-/* Obligation kinds from verification policy */
+/* Import Obligation and ObligationSet from sov_obligations.h */
+#include "src/obligations/sov_obligations.h"
+
+/* Map certificate obligation kinds to internal kinds */
 typedef enum {
-    OB_INV_OK,      /* Invariant verification required: A*X = I */
-    OB_SOLVE_OK,    /* Linear system solution required: A*x = b */
-    OB_LSTSQ_OK,    /* Least squares solution required: A^T(Ax-b) = 0 */
-    OB_TYPE_OK,     /* Type inference obligation */
-    OB_PROP_OK,     /* Property holds at location */
-} ObligationKind;
-
-/* Single obligation with witness slot */
-typedef struct {
-    uint32_t id;                /* Obligation ID (0, 1, 2, ...) */
-    ObligationKind kind;        /* Type of obligation */
-    uint32_t start_pc;          /* Start program counter */
-    uint32_t end_pc;            /* End program counter */
-
-    /* Obligation-specific parameters */
-    union {
-        struct {
-            int64_t *matrix_a;  /* n x n matrix for invariant */
-            size_t n;           /* Matrix dimension */
-        } inv_params;
-        struct {
-            int64_t *matrix_a;  /* m x n matrix for solve */
-            int64_t *vector_b;  /* Right-hand side vector */
-            size_t m, n;        /* Dimensions */
-        } solve_params;
-        struct {
-            int64_t *matrix_a;  /* m x n for least squares */
-            int64_t *vector_b;  /* Residual vector */
-            size_t m, n;        /* Dimensions */
-        } lstsq_params;
-    } params;
-
-    /* Witness (filled by verifier) */
-    int64_t *witness;           /* Witness data: solution, inverse, etc. */
-    size_t witness_len;         /* Witness length in elements */
-    bool witness_filled;        /* True if verifier filled this */
-} Obligation;
-
-/* Obligation set for a program */
-typedef struct {
-    Obligation *obligations;    /* Array of obligations */
-    size_t count;               /* Number of obligations */
-} ObligationSet;
+    OB_INV_OK = OBL_KIND_INV,      /* Invariant verification required: A*X = I */
+    OB_SOLVE_OK = OBL_KIND_SOLVE,  /* Linear system solution required: A*x = b */
+    OB_LSTSQ_OK = OBL_KIND_LSTSQ,  /* Least squares solution required: A^T(Ax-b) = 0 */
+    OB_TYPE_OK = OBL_KIND_TYPE,    /* Type inference obligation */
+    OB_PROP_OK = OBL_KIND_PROP,    /* Property holds at location */
+} CertObligationKind;
 
 /* Proof certificate structure (RFC 8949 CBOR-compatible) */
 typedef struct {
@@ -209,6 +175,118 @@ int sov_receipt_verify(const WormReceipt *receipt);
 int sov_receipt_to_json(const WormReceipt *receipt,
                         uint8_t **out_json,
                         size_t *out_len);
+
+/*
+ * ============================================================================
+ * PHASE 4: Ed25519 SIGNING API
+ * ============================================================================
+ */
+
+/* Sign receipt with Ed25519 deterministic signature */
+int sign_receipt(WormReceipt *receipt, const uint8_t sk[32]);
+
+/* Verify Ed25519 signature with public key */
+int verify_signature(const WormReceipt *receipt, const uint8_t pk[32],
+                    const uint8_t sig[64]);
+
+/* Verify receipt using embedded public key */
+int verify_receipt_signature(const WormReceipt *receipt);
+
+/*
+ * ============================================================================
+ * PHASE 4: WORM CHAIN API
+ * ============================================================================
+ */
+
+typedef struct WormChain WormChain;  /* Opaque WORM chain type */
+
+/* Create new WORM chain */
+WormChain *worm_new(void);
+
+/* Free WORM chain */
+void worm_free(WormChain *w);
+
+/* Append receipt to WORM chain with parent hashing */
+int worm_append(WormChain *w, WormReceipt *receipt, uint8_t node_hash[32]);
+
+/* Get receipt by index */
+WormReceipt *worm_get_receipt(WormChain *w, uint64_t index);
+
+/* Verify entire WORM chain for tampering */
+int worm_verify_chain(WormChain *w);
+
+/* Get count of receipts in chain */
+uint64_t worm_count(WormChain *w);
+
+/* Get tail (most recent) receipt */
+WormReceipt *worm_tail(WormChain *w);
+
+/* Get head (genesis) receipt */
+WormReceipt *worm_head(WormChain *w);
+
+/* Export node hashes */
+int worm_get_node_hashes(WormChain *w, uint64_t index,
+                         uint8_t parent_hash[32],
+                         uint8_t node_hash[32]);
+
+/*
+ * ============================================================================
+ * PHASE 4: REPLAY PROTECTION API
+ * ============================================================================
+ */
+
+typedef struct NonceRegistry NonceRegistry;  /* Opaque nonce registry */
+
+/* Create new nonce registry */
+NonceRegistry *nonce_registry_new(void);
+
+/* Free nonce registry */
+void nonce_registry_free(NonceRegistry *reg);
+
+/* Add nonce to receipt */
+int receipt_add_nonce(WormReceipt *receipt, uint64_t nonce);
+
+/* Extract nonce from receipt */
+uint64_t receipt_get_nonce(const WormReceipt *receipt);
+
+/* Add timestamp to receipt */
+int receipt_add_timestamp(WormReceipt *receipt, int64_t unix_ms);
+
+/* Register nonce in registry (reject duplicates) */
+int register_nonce(uint64_t nonce, NonceRegistry *registry);
+
+/* Verify nonce and register (replay protection) */
+int verify_receipt_nonce(const WormReceipt *receipt, NonceRegistry *registry);
+
+/* Verify timestamp is within bounds */
+int verify_receipt_timestamp(const WormReceipt *receipt, int64_t max_age_seconds);
+
+/* Verify no clock skew */
+int verify_no_clock_skew(const WormReceipt *receipt, int64_t max_skew_seconds);
+
+/* Complete replay protection validation */
+int verify_replay_protection(const WormReceipt *receipt,
+                            NonceRegistry *registry,
+                            int64_t max_age_seconds,
+                            int64_t max_skew_seconds);
+
+/*
+ * ============================================================================
+ * PHASE 4: PERSISTENCE API
+ * ============================================================================
+ */
+
+/* Atomically persist receipt to file */
+int persist_receipt(WormReceipt *receipt, const char *path);
+
+/* Load receipt from file */
+WormReceipt *load_receipt(const char *path);
+
+/* Persist WORM chain to directory */
+int persist_worm_chain(WormChain *w, const char *dir);
+
+/* Load WORM chain from directory */
+WormChain *load_worm_chain(const char *dir);
 
 #ifdef __cplusplus
 }
