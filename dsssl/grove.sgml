@@ -1,0 +1,26 @@
+<!DOCTYPE GROVE [
+  <!-- SGML input grove for DSSSL + Verilog synthesis pipeline -->
+  <!-- Expression: 10 + (?x * 5) = 20   =>  ?x = 2           -->
+  <!ELEMENT GROVE - - (EXPR+)>
+  <!ELEMENT EXPR  - - (OP, LEFT, RIGHT)>
+  <!ATTLIST EXPR id ID #REQUIRED>
+  <!ELEMENT OP    - - (#PCDATA)>
+  <!ELEMENT LEFT  - - (EXPR | HOLE | INT)>
+  <!ELEMENT RIGHT - - (EXPR | HOLE | INT)>
+  <!ELEMENT HOLE  - O EMPTY>
+  <!ATTLIST HOLE var CDATA #REQUIRED>
+  <!ELEMENT INT   - - (#PCDATA)>
+]>
+<GROVE>
+  <EXPR id="node-1">
+    <OP>+</OP>
+    <LEFT><INT>10</INT></LEFT>
+    <RIGHT>
+      <EXPR id="node-2">
+        <OP>*</OP>
+        <LEFT><HOLE var="?x"></LEFT>
+        <RIGHT><INT>5</INT></RIGHT>
+      </EXPR>
+    </RIGHT>
+  </EXPR>
+</GROVE>
